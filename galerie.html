@@ -173,6 +173,35 @@
     color: var(--ink);
   }
 
+  /* Download-Button auf der Fotokachel */
+  .download-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.2s ease, background 0.2s ease, transform 0.2s var(--ease-out-back);
+    z-index: 5;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .gallery-card:hover .download-btn { opacity: 1; }
+  .download-btn:hover { background: var(--accent); transform: scale(1.12); }
+  .download-btn:active { transform: scale(0.95); }
+  .download-btn svg { width: 18px; height: 18px; fill: currentColor; }
+  /* Auf Touch-Geräten immer sichtbar (kein Hover vorhanden) */
+  @media (hover: none) {
+    .download-btn { opacity: 1; }
+  }
+
   #gallery-status {
     text-align: center;
     color: var(--muted);
@@ -514,6 +543,9 @@ function cleanFileName(filename) {
     .trim();
 }
 
+/* Download-Icon (Material "download") */
+const DOWNLOAD_ICON_SVG = `<svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>`;
+
 /* Startet einen Datei-Download für den angegebenen Pfad */
 function triggerDownload(url, filename) {
   const a = document.createElement('a');
@@ -577,6 +609,20 @@ function renderBreadcrumb() {
     crumb.onclick = () => { pathStack = pathStack.slice(0, idx + 1); renderGallery(); };
     bc.appendChild(crumb);
   });
+}
+
+/* Erzeugt den kleinen Download-Button für eine Fotokachel */
+function createDownloadButton(url, filename) {
+  const btn = document.createElement('button');
+  btn.className = 'download-btn';
+  btn.title = 'Foto herunterladen';
+  btn.setAttribute('aria-label', 'Foto herunterladen');
+  btn.innerHTML = DOWNLOAD_ICON_SVG;
+  btn.onclick = (e) => {
+    e.stopPropagation();
+    triggerDownload(url, filename);
+  };
+  return btn;
 }
 
 function renderGallery() {
@@ -645,6 +691,7 @@ function renderGallery() {
 
     card.appendChild(img);
     card.appendChild(nameLabel);
+    card.appendChild(createDownloadButton(`fotos/${file.path}`, file.name));
     card.onclick = () => openLightbox(currentPhotoList, index);
 
     fragment.appendChild(card);
@@ -779,6 +826,7 @@ function showPersonResults(key) {
 
     card.appendChild(img);
     card.appendChild(nameLabel);
+    card.appendChild(createDownloadButton(`Fotos_Suche/${file.full}`, file.full));
     card.onclick = () => openLightbox(currentPhotoList, index);
 
     fragment.appendChild(card);
