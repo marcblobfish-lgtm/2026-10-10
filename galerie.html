@@ -1,0 +1,1032 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Alte Fotos - Familie Henke</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  :root {
+    --bg: #FDF6E9;
+    --paper: #FFFFFF;
+    --ink: #1A1A1A;
+    --muted: #767066;
+    --line: #E0DBCF;
+    --line-strong: #C7BFAF;
+    --accent: #D86A00;
+    --accent-dark: #A65100;
+    --ease-out-back: cubic-bezier(0.34, 1.56, 0.64, 1);
+    --ease-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { 
+    margin: 0; 
+    background: var(--bg); 
+    font-family: 'Inter', -apple-system, sans-serif; 
+    overflow: hidden; 
+    color: var(--ink);
+    padding-bottom: 60px;
+    height: 100vh;
+    height: 100dvh;
+    overscroll-behavior: none;
+  }
+
+
+.gallery-page {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  overflow-y: auto;
+  padding: 40px 20px 80px 20px;
+  -webkit-overflow-scrolling: touch;
+}
+  /* Untere Tab-Leiste */
+  .bottom-tabs {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background: var(--accent-dark);
+    display: flex;
+    justify-content: center;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+    z-index: 9999;
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .bottom-tabs button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    padding: 15px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.25s var(--ease-smooth), color 0.25s var(--ease-smooth), transform 0.1s ease;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .bottom-tabs button:active { transform: scale(0.97); }
+  .bottom-tabs button:hover, .bottom-tabs button.active {
+    background: var(--accent);
+    color: #fff;
+  }
+
+  /* Foto-Galerie Styling */
+  #galerie-tab {
+    overflow-y: auto;
+    padding: 40px 20px 80px 20px;
+    -webkit-overflow-scrolling: touch;
+  }
+  .gallery-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .gallery-container h1 {
+    color: var(--accent-dark);
+    text-align: center;
+    margin-bottom: 10px;
+  }
+  .gallery-container p {
+    text-align: center;
+    color: var(--muted);
+    margin-bottom: 30px;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 20px;
+  }
+
+  /* Kachel-Anpassungen & Entrance-Keyframes */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px) scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .gallery-card, .folder-tile {
+    animation: fadeInUp 0.4s var(--ease-smooth) forwards;
+    will-change: transform, opacity;
+  }
+
+  /* Modere, minimalistische Bildkarte */
+  .gallery-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--paper);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    transition: transform 0.3s var(--ease-out-back), box-shadow 0.3s var(--ease-smooth);
+    cursor: pointer;
+    border: 1px solid rgba(0,0,0,0.04);
+  }
+  .gallery-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.09);
+  }
+  .gallery-card:active {
+    transform: translateY(-2px) scale(0.99);
+  }
+  .gallery-card img {
+    width: 100%;
+    height: 165px;
+    object-fit: cover;
+    display: block;
+    background: #f0ede6;
+    transition: transform 0.4s var(--ease-smooth), filter 0.3s ease;
+  }
+  .gallery-card:hover img {
+    filter: brightness(1.03);
+    transform: scale(1.03);
+  }
+  
+  /* Minimalistische Bild-Beschriftung */
+  .gallery-card .file-name {
+    padding: 10px 12px;
+    font-size: 11.5px;
+    color: var(--muted);
+    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    background: var(--paper);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.2s ease;
+  }
+  .gallery-card:hover .file-name {
+    color: var(--ink);
+  }
+
+  #gallery-status {
+    text-align: center;
+    color: var(--muted);
+    display: none;
+    font-size: 14px;
+  }
+
+  /* Personensuche */
+  .person-search {
+    position: relative;
+    max-width: 480px;
+    margin: 0 auto 24px auto;
+  }
+  .person-search input {
+    width: 100%;
+    padding: 12px 40px 12px 16px;
+    font-size: 15px;
+    font-family: inherit;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+  .person-search input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(216, 106, 0, 0.12);
+  }
+  .person-search .clear-btn {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: 50%;
+    background: var(--line);
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: none;
+    align-items: center;
+    justify-content: center;
+  }
+  .person-search .clear-btn.show { display: flex; }
+  .person-search-suggestions {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    right: 0;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 50;
+    display: none;
+  }
+  .person-search-suggestions.show { display: block; }
+  .person-search-suggestions .suggestion {
+    padding: 10px 16px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .person-search-suggestions .suggestion:last-child { border-bottom: none; }
+  .person-search-suggestions .suggestion:hover,
+  .person-search-suggestions .suggestion.active {
+    background: rgba(216, 106, 0, 0.08);
+  }
+  .person-search-suggestions .suggestion .count {
+    color: var(--muted);
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .person-search-suggestions .no-match {
+    padding: 12px 16px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+  .person-result-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin: -10px auto 20px auto;
+    max-width: 480px;
+    font-size: 14px;
+    color: var(--muted);
+  }
+  .person-result-header .back-link {
+    color: var(--accent-dark);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .person-result-header .back-link:hover { text-decoration: underline; }
+
+  /* Breadcrumb Navigation */
+  .breadcrumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+  .breadcrumb .crumb {
+    color: var(--accent-dark);
+    cursor: pointer;
+    font-weight: 600;
+    padding: 4px 6px;
+    border-radius: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .breadcrumb .crumb:hover { background: rgba(216, 106, 0, 0.12); }
+  .breadcrumb .crumb.current { color: var(--muted); cursor: default; font-weight: 400; }
+  .breadcrumb .crumb.current:hover { background: none; }
+  .breadcrumb .sep { color: var(--line-strong); }
+
+  /* Ordner-Kacheln */
+  .folder-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 18px 10px;
+    background: rgba(216, 106, 0, 0.05);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.3s var(--ease-out-back), background 0.25s ease, box-shadow 0.3s ease;
+    text-align: center;
+    height: 100%;
+  }
+  .folder-tile:hover {
+    background: rgba(216, 106, 0, 0.12);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(216, 106, 0, 0.1);
+  }
+  .folder-tile:active { transform: translateY(-1px) scale(0.98); }
+  .folder-tile svg { 
+    width: 38px; height: 38px; fill: var(--accent); 
+    transition: transform 0.3s var(--ease-out-back);
+  }
+  .folder-tile:hover svg { transform: scale(1.1); }
+  .folder-tile .folder-name { font-size: 13px; font-weight: 600; color: var(--ink); word-break: break-word; line-height: 1.3; }
+  .folder-tile .folder-count { font-size: 11px; color: var(--muted); }
+
+  /* Lightbox Animationen */
+  #lightbox {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.92);
+    backdrop-filter: blur(8px);
+    overflow: hidden;
+    touch-action: none;
+    opacity: 0;
+    transition: opacity 0.3s var(--ease-smooth);
+  }
+  #lightbox.show { opacity: 1; }
+  #lightbox-container {
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    cursor: grab; touch-action: none;
+  }
+  #lightbox-container:active { cursor: grabbing; }
+  #lightbox-img {
+    max-width: 85vw; max-height: 80vh;
+    border-radius: 4px;
+    box-shadow: 0 0 35px rgba(0,0,0,0.6);
+    transition: transform 0.1s ease-out, opacity 0.2s ease;
+    transform-origin: center center;
+    user-select: none;
+    -webkit-user-drag: none;
+    will-change: transform, opacity;
+  }
+  #lightbox .close {
+    position: absolute; top: 20px; right: 30px;
+    color: white; font-size: 32px; font-weight: bold;
+    cursor: pointer; z-index: 10002;
+    background: rgba(0,0,0,0.4);
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+    transition: background 0.2s ease, transform 0.2s var(--ease-out-back);
+    border: none;
+  }
+  #lightbox .close:hover {
+    background: var(--accent);
+    transform: scale(1.12) rotate(90deg);
+  }
+
+  /* Download-Button in der Lightbox */
+  #lightbox .download {
+    position: absolute; top: 20px; left: 30px;
+    cursor: pointer; z-index: 10002;
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    user-select: none;
+    transition: background 0.2s ease, transform 0.2s var(--ease-out-back);
+    border: none;
+  }
+  #lightbox .download:hover {
+    background: var(--accent);
+    transform: scale(1.12);
+  }
+  #lightbox .download:active { transform: scale(0.95); }
+  #lightbox .download svg { width: 22px; height: 22px; fill: currentColor; }
+
+  .lightbox-nav {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.4); color: white;
+    border: none; font-size: 28px; padding: 12px 18px;
+    cursor: pointer; z-index: 10001; border-radius: 8px;
+    transition: background 0.2s ease, transform 0.2s var(--ease-out-back);
+    user-select: none;
+  }
+  .lightbox-nav:hover { background: var(--accent); transform: translateY(-50%) scale(1.1); }
+  .lightbox-nav:active { transform: translateY(-50%) scale(0.95); }
+  .lightbox-nav.prev { left: 20px; }
+  .lightbox-nav.next { right: 20px; }
+
+  .lightbox-hint {
+    position: absolute; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    color: rgba(255,255,255,0.7); font-size: 13px;
+    pointer-events: none; z-index: 10001;
+    background: rgba(0,0,0,0.5); padding: 6px 14px;
+    border-radius: 20px; white-space: nowrap;
+  }
+
+  #lightbox-caption {
+    position: absolute;
+    bottom: 64px;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: min(80vw, 640px);
+    color: rgba(255,255,255,0.92);
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+    background: rgba(0,0,0,0.55);
+    padding: 10px 18px;
+    border-radius: 12px;
+    z-index: 10001;
+    display: none;
+    pointer-events: none;
+  }
+  #lightbox-caption.show { display: block; }
+  #lightbox-caption .zeitraum {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+  }
+  @media (max-width: 640px) {
+    #lightbox-caption { bottom: 56px; font-size: 13px; max-width: 88vw; }
+    .lightbox-hint { display: none; }
+  }
+
+</style>
+</head>
+<body>
+<!-- Foto-Galerie -->
+<div class="gallery-page">
+  <div class="gallery-container">
+    <h1>Alte Familienfotos</h1>
+    <p>Ordner anklicken zum Durchblättern, Foto anklicken für die Großansicht.</p>
+
+    <div class="person-search">
+      <input type="text" id="person-search-input" placeholder="Person suchen (z.B. Klaus Henke) …" autocomplete="off">
+      <button class="clear-btn" id="person-search-clear" title="Suche löschen">&times;</button>
+      <div class="person-search-suggestions" id="person-search-suggestions"></div>
+    </div>
+    <div class="person-result-header" id="person-result-header" style="display:none;"></div>
+
+    <div class="breadcrumb"></div>
+    <div class="gallery"></div>
+    <p id="gallery-status"></p>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+    <button class="download" onclick="downloadCurrentPhoto()" title="Foto herunterladen" aria-label="Foto herunterladen">
+      <svg viewBox="0 0 24 24"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+    </button>
+    <span class="close" onclick="closeLightbox()">&times;</span>
+    <button class="lightbox-nav prev" onclick="navigateLightbox(-1)">&#10094;</button>
+    <button class="lightbox-nav next" onclick="navigateLightbox(1)">&#10095;</button>
+    <div id="lightbox-container">
+        <img id="lightbox-img" src="" alt="Großansicht">
+    </div>
+    <div id="lightbox-caption"></div>
+    <div class="lightbox-hint">Pfeile: Weiter/Zurück | Mausrad: Zoom | Ziehen: Verschieben | Pfeil-Button: Foto herunterladen</div>
+</div>
+
+<!-- Unteres Menü (Navigation zwischen den Seiten) -->
+<div class="bottom-tabs">
+    <button onclick="window.location.href='ahnentafel.html'">Ahnentafel</button>
+    <button class="active">Alte Fotos</button>
+</div>
+
+<script>
+/* Hilfsfunktion zum sicheren Escapen von Text vor dem Einfügen als HTML */
+function escapeHtml(str) {
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+/* Hilfsfunktion zur Bereinigung von Dateinamen */
+function cleanFileName(filename) {
+  if (!filename) return '';
+  return filename
+    .replace(/\.[^/.]+$/, "")             // Dateiendung entfernen (.png, .jpg, etc.)
+    .replace(/_ergebnis/gi, "")          // Suffix "_ergebnis" entfernen
+    .replace(/_/g, " ")                  // Unterstriche durch Leerzeichen ersetzen
+    .trim();
+}
+
+/* Startet einen Datei-Download für den angegebenen Pfad */
+function triggerDownload(url, filename) {
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename || '';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+/* Download des aktuell in der Lightbox angezeigten Fotos */
+function downloadCurrentPhoto() {
+  const path = activeImageList[activeImageIndex];
+  if (!path) return;
+  const filename = path.split('/').pop();
+  triggerDownload(path, filename);
+}
+
+/* ============================================================
+   FOTO-GALERIE MIT ORDNERSTRUKTUR & STAGGERED FADE-IN
+   ============================================================ */
+const FOLDER_ICON_SVG = `<svg viewBox="0 0 24 24"><path d="M10 4H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-8l-2-2z"/></svg>`;
+
+let galleryTree = null;   
+let pathStack = [];       
+let currentPhotoList = [];
+
+function countPhotosRecursive(node) {
+  let count = 0;
+  for (const child of node.children) {
+    if (child.type === 'file') count++;
+    else count += countPhotosRecursive(child);
+  }
+  return count;
+}
+
+function currentFolderNode() {
+  return pathStack.length ? pathStack[pathStack.length - 1].node : galleryTree;
+}
+
+function renderBreadcrumb() {
+  const bc = document.querySelector('.breadcrumb');
+  bc.innerHTML = '';
+
+  const home = document.createElement('span');
+  home.className = pathStack.length ? 'crumb' : 'crumb current';
+  home.textContent = 'Alle Fotos';
+  home.onclick = () => { pathStack = []; renderGallery(); };
+  bc.appendChild(home);
+
+  pathStack.forEach((entry, idx) => {
+    const sep = document.createElement('span');
+    sep.className = 'sep';
+    sep.textContent = '/';
+    bc.appendChild(sep);
+
+    const crumb = document.createElement('span');
+    const isLast = idx === pathStack.length - 1;
+    crumb.className = isLast ? 'crumb current' : 'crumb';
+    crumb.textContent = entry.name;
+    crumb.onclick = () => { pathStack = pathStack.slice(0, idx + 1); renderGallery(); };
+    bc.appendChild(crumb);
+  });
+}
+
+function renderGallery() {
+  const galleryEl = document.querySelector('.gallery');
+  const statusEl = document.getElementById('gallery-status');
+  galleryEl.innerHTML = '';
+  statusEl.style.display = 'none';
+
+  renderBreadcrumb();
+
+  const node = currentFolderNode();
+  if (!node) return;
+
+  const folders = node.children.filter(c => c.type === 'folder');
+  const files = node.children.filter(c => c.type === 'file');
+
+  currentPhotoList = files.map(f => `fotos/${f.path}`);
+
+  if (folders.length === 0 && files.length === 0) {
+    statusEl.textContent = 'Dieser Ordner ist leer.';
+    statusEl.style.display = 'block';
+    return;
+  }
+
+  const fragment = document.createDocumentFragment();
+  let itemIndex = 0;
+
+  folders.forEach(folder => {
+    const tile = document.createElement('div');
+    tile.className = 'folder-tile';
+    tile.style.animationDelay = `${itemIndex * 0.03}s`;
+    itemIndex++;
+
+    const photoCount = countPhotosRecursive(folder);
+    tile.innerHTML = `${FOLDER_ICON_SVG}
+      <span class="folder-name">${escapeHtml(folder.name)}</span>
+      <span class="folder-count">${photoCount} Foto${photoCount === 1 ? '' : 's'}</span>`;
+    tile.onclick = () => { pathStack.push({ name: folder.name, node: folder }); renderGallery(); };
+    fragment.appendChild(tile);
+  });
+
+  files.forEach((file, index) => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.style.animationDelay = `${itemIndex * 0.03}s`;
+    itemIndex++;
+
+    const cleanedName = cleanFileName(file.name);
+
+    const img = document.createElement('img');
+    img.src = `fotos/thumbs/${file.thumb}`;
+    img.alt = cleanedName;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.onerror = () => {
+      if (!img.dataset.fallback) {
+        img.dataset.fallback = '1';
+        img.src = `fotos/${file.path}`;
+      }
+    };
+
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'file-name';
+    nameLabel.textContent = cleanedName;
+    nameLabel.title = cleanedName;
+
+    card.appendChild(img);
+    card.appendChild(nameLabel);
+    card.onclick = () => openLightbox(currentPhotoList, index);
+
+    fragment.appendChild(card);
+  });
+
+  galleryEl.appendChild(fragment);
+}
+
+/* ============================================================
+   PERSONENSUCHE
+   ============================================================ */
+let personenDaten = null;
+let personenListe = [];
+let inPersonView = false;
+
+function normalizeSearchText(s) {
+  return s
+    .toLowerCase()
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+    .normalize('NFKD').replace(/[\u0300-\u036f]/g, '');
+}
+
+async function loadPersonenSuche() {
+  try {
+    const res = await fetch('personen_suche.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    personenDaten = await res.json();
+    personenListe = Object.keys(personenDaten).map(key => ({
+      key,
+      display: personenDaten[key].display,
+      search: personenDaten[key].search,
+      count: personenDaten[key].photos.length
+    })).sort((a, b) => a.display.localeCompare(b.display, 'de'));
+  } catch (err) {
+    console.error('Personensuche konnte nicht geladen werden:', err);
+    personenDaten = {};
+    personenListe = [];
+  }
+}
+
+const searchInput = document.getElementById('person-search-input');
+const searchClearBtn = document.getElementById('person-search-clear');
+const suggestionsBox = document.getElementById('person-search-suggestions');
+const resultHeader = document.getElementById('person-result-header');
+
+let currentSuggestions = [];
+let activeSuggestionIndex = -1;
+
+function updateActiveSuggestionHighlight() {
+  const rows = suggestionsBox.querySelectorAll('.suggestion');
+  rows.forEach((row, idx) => {
+    row.classList.toggle('active', idx === activeSuggestionIndex);
+  });
+}
+
+function renderSuggestions(query) {
+  const q = normalizeSearchText(query.trim());
+  suggestionsBox.innerHTML = '';
+  currentSuggestions = [];
+  activeSuggestionIndex = -1;
+  if (!q) {
+    suggestionsBox.classList.remove('show');
+    return;
+  }
+  const matches = personenListe.filter(p => p.search.includes(q)).slice(0, 10);
+  if (matches.length === 0) {
+    const div = document.createElement('div');
+    div.className = 'no-match';
+    div.textContent = 'Keine Person gefunden.';
+    suggestionsBox.appendChild(div);
+    suggestionsBox.classList.add('show');
+    return;
+  }
+  currentSuggestions = matches;
+  matches.forEach(p => {
+    const row = document.createElement('div');
+    row.className = 'suggestion';
+    row.innerHTML = `<span>${escapeHtml(p.display)}</span><span class="count">${p.count} Foto${p.count === 1 ? '' : 's'}</span>`;
+    row.onclick = () => showPersonResults(p.key);
+    suggestionsBox.appendChild(row);
+  });
+  activeSuggestionIndex = 0;
+  updateActiveSuggestionHighlight();
+  suggestionsBox.classList.add('show');
+}
+
+function showPersonResults(key) {
+  const person = personenDaten[key];
+  if (!person) return;
+
+  inPersonView = true;
+  searchInput.value = person.display;
+  searchClearBtn.classList.add('show');
+  suggestionsBox.classList.remove('show');
+  document.querySelector('.breadcrumb').style.display = 'none';
+
+  resultHeader.style.display = 'flex';
+  resultHeader.innerHTML = `<span>${person.photos.length} Foto${person.photos.length === 1 ? '' : 's'} von ${escapeHtml(person.display)}</span><span class="back-link">Zurück zur Galerie</span>`;
+  resultHeader.querySelector('.back-link').onclick = resetPersonSearch;
+
+  const galleryEl = document.querySelector('.gallery');
+  const statusEl = document.getElementById('gallery-status');
+  galleryEl.innerHTML = '';
+  statusEl.style.display = 'none';
+
+  currentPhotoList = person.photos.map(f => `Fotos_Suche/${f.full}`);
+
+  const fragment = document.createDocumentFragment();
+  person.photos.forEach((file, index) => {
+    const card = document.createElement('div');
+    card.className = 'gallery-card';
+    card.style.animationDelay = `${index * 0.03}s`;
+
+    const cleanedName = cleanFileName(file.full);
+
+    const img = document.createElement('img');
+    img.src = `Thumbs_Suche/${file.thumb}`;
+    img.alt = cleanedName;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+    img.onerror = () => {
+      if (!img.dataset.fallback) {
+        img.dataset.fallback = '1';
+        img.src = `Fotos_Suche/${file.full}`;
+      }
+    };
+
+    const nameLabel = document.createElement('div');
+    nameLabel.className = 'file-name';
+    nameLabel.textContent = cleanedName;
+    nameLabel.title = cleanedName;
+
+    card.appendChild(img);
+    card.appendChild(nameLabel);
+    card.onclick = () => openLightbox(currentPhotoList, index);
+
+    fragment.appendChild(card);
+  });
+  galleryEl.appendChild(fragment);
+}
+
+function resetPersonSearch() {
+  inPersonView = false;
+  searchInput.value = '';
+  searchClearBtn.classList.remove('show');
+  suggestionsBox.classList.remove('show');
+  resultHeader.style.display = 'none';
+  document.querySelector('.breadcrumb').style.display = '';
+  renderGallery();
+}
+
+searchInput.addEventListener('input', () => {
+  searchClearBtn.classList.toggle('show', searchInput.value.length > 0);
+  if (inPersonView) inPersonView = false;
+  renderSuggestions(searchInput.value);
+});
+
+searchInput.addEventListener('focus', () => {
+  if (searchInput.value.trim() && !inPersonView) renderSuggestions(searchInput.value);
+});
+
+searchInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    if (currentSuggestions.length > 0) {
+      const idx = activeSuggestionIndex >= 0 ? activeSuggestionIndex : 0;
+      showPersonResults(currentSuggestions[idx].key);
+    }
+  } else if (e.key === 'ArrowDown') {
+    if (currentSuggestions.length === 0) return;
+    e.preventDefault();
+    activeSuggestionIndex = (activeSuggestionIndex + 1) % currentSuggestions.length;
+    updateActiveSuggestionHighlight();
+  } else if (e.key === 'ArrowUp') {
+    if (currentSuggestions.length === 0) return;
+    e.preventDefault();
+    activeSuggestionIndex = (activeSuggestionIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
+    updateActiveSuggestionHighlight();
+  } else if (e.key === 'Escape') {
+    suggestionsBox.classList.remove('show');
+  }
+});
+
+searchClearBtn.addEventListener('click', resetPersonSearch);
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.person-search')) {
+    suggestionsBox.classList.remove('show');
+  }
+});
+
+async function loadGallery() {
+  const statusEl = document.getElementById('gallery-status');
+
+  try {
+    const res = await fetch('fotos/manifest.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    galleryTree = await res.json();
+
+    if (!galleryTree || !galleryTree.children || galleryTree.children.length === 0) {
+      statusEl.textContent = 'Noch keine Fotos im Ordner "fotos" gefunden.';
+      statusEl.style.display = 'block';
+      return;
+    }
+
+    pathStack = [];
+    renderGallery();
+  } catch (err) {
+    console.error('Galerie konnte nicht geladen werden:', err);
+    statusEl.textContent = 'Fotos konnten nicht geladen werden.';
+    statusEl.style.display = 'block';
+  }
+}
+
+loadGallery();
+loadPersonenSuche();
+loadFotoInfos();
+
+/* ============================================================
+   INTERAKTIVE LIGHTBOX (ZOOM, PAN & TRANSITIONS)
+   ============================================================ */
+const lightbox = document.getElementById('lightbox');
+const lbContainer = document.getElementById('lightbox-container');
+const lbImg = document.getElementById('lightbox-img');
+const lbCaption = document.getElementById('lightbox-caption');
+
+let fotoInfos = {};
+async function loadFotoInfos() {
+  try {
+    const res = await fetch('foto_infos.json', { cache: 'no-store' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    fotoInfos = await res.json();
+  } catch (err) {
+    console.error('Foto-Infos konnten nicht geladen werden:', err);
+    fotoInfos = {};
+  }
+}
+
+function updateLightboxCaption() {
+  const path = activeImageList[activeImageIndex] || '';
+  const filename = path.split('/').pop();
+  const info = fotoInfos[filename];
+  if (info && info.beschreibung) {
+    let html = escapeHtml(info.beschreibung);
+    if (info.zeitraum) {
+      html += `<span class="zeitraum">${escapeHtml(info.zeitraum)}</span>`;
+    }
+    lbCaption.innerHTML = html;
+    lbCaption.classList.add('show');
+  } else {
+    lbCaption.innerHTML = '';
+    lbCaption.classList.remove('show');
+  }
+}
+
+let activeImageList = [];
+let activeImageIndex = 0;
+
+let zoomScale = 1;
+let translateX = 0;
+let translateY = 0;
+let isDragging = false;
+let startX = 0;
+let startY = 0;
+
+function applyTransform() {
+  lbImg.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomScale})`;
+}
+
+function resetZoom() {
+  zoomScale = 1;
+  translateX = 0;
+  translateY = 0;
+  applyTransform();
+}
+
+function openLightbox(images, index) {
+  if (typeof images === 'string') {
+    activeImageList = [images];
+    activeImageIndex = 0;
+  } else {
+    activeImageList = images;
+    activeImageIndex = index;
+  }
+
+  updateLightboxImage();
+  lightbox.style.display = 'block';
+  requestAnimationFrame(() => {
+    lightbox.classList.add('show');
+  });
+}
+
+function updateLightboxImage() {
+  if (activeImageList.length > 0) {
+    lbImg.style.opacity = '0';
+    setTimeout(() => {
+      lbImg.src = activeImageList[activeImageIndex];
+      lbImg.style.opacity = '1';
+    }, 120);
+  }
+  updateLightboxCaption();
+  const showNav = activeImageList.length > 1;
+  document.querySelector('.lightbox-nav.prev').style.display = showNav ? 'block' : 'none';
+  document.querySelector('.lightbox-nav.next').style.display = showNav ? 'block' : 'none';
+  resetZoom();
+}
+
+function navigateLightbox(direction) {
+  if (activeImageList.length <= 1) return;
+  activeImageIndex = (activeImageIndex + direction + activeImageList.length) % activeImageList.length;
+  updateLightboxImage();
+}
+
+function closeLightbox() {
+  lightbox.classList.remove('show');
+  setTimeout(() => {
+    lightbox.style.display = 'none';
+    lbImg.src = '';
+    lbCaption.classList.remove('show');
+    lbCaption.innerHTML = '';
+    resetZoom();
+  }, 300);
+}
+
+lbContainer.addEventListener('wheel', (e) => {
+  e.preventDefault();
+  const zoomFactor = e.deltaY < 0 ? 1.2 : 0.82;
+  const newScale = zoomScale * zoomFactor;
+
+  if (newScale >= 0.8 && newScale <= 8) {
+    zoomScale = newScale;
+    if (zoomScale <= 1) {
+      translateX = 0;
+      translateY = 0;
+    }
+    applyTransform();
+  }
+}, { passive: false });
+
+lbContainer.addEventListener('pointerdown', (e) => {
+  if (e.target.classList.contains('close') || e.target.classList.contains('lightbox-nav') || e.target.classList.contains('download')) return;
+  isDragging = true;
+  startX = e.clientX - translateX;
+  startY = e.clientY - translateY;
+  lbContainer.setPointerCapture(e.pointerId);
+});
+
+lbContainer.addEventListener('pointermove', (e) => {
+  if (!isDragging) return;
+  e.preventDefault();
+  translateX = e.clientX - startX;
+  translateY = e.clientY - startY;
+  applyTransform();
+});
+
+const stopDrag = (e) => {
+  if (isDragging) {
+    isDragging = false;
+    try { lbContainer.releasePointerCapture(e.pointerId); } catch(_) {}
+  }
+};
+
+lbContainer.addEventListener('pointerup', stopDrag);
+lbContainer.addEventListener('pointercancel', stopDrag);
+
+lbContainer.addEventListener('dblclick', (e) => {
+  if (e.target.classList.contains('close') || e.target.classList.contains('lightbox-nav') || e.target.classList.contains('download')) return;
+  if (zoomScale > 1) {
+    resetZoom();
+  } else {
+    zoomScale = 2.5;
+    applyTransform();
+  }
+});
+
+document.addEventListener('keydown', e => {
+  if (lightbox.style.display === 'block' || lightbox.classList.contains('show')) {
+    if (e.key === 'ArrowLeft') navigateLightbox(-1);
+    if (e.key === 'ArrowRight') navigateLightbox(1);
+    if (e.key === 'Escape') closeLightbox();
+  }
+});
+</script>
+</body>
+</html>
